@@ -58,11 +58,11 @@ namespace Shadowin
         {
             using (var about = new About())
             {
-                var result = about.ShowDialog();
-                if (result == DialogResult.OK)
-                {
-                    Process.Start("https://github.com/heddaz/shadowin");
-                }
+                //var result = about.ShowDialog();
+                //if (result == DialogResult.OK)
+                //{
+                //    Process.Start("https://github.com/heddaz/shadowin");
+                //}
             }
         }
         private void Shadowin_FormClosing(object sender, FormClosingEventArgs e)
@@ -145,7 +145,6 @@ namespace Shadowin
             #region 窗体
 
             this.toolTip.ToolTipTitle = SwGlobal.Title;
-            this.toolTip.SetToolTip(this.logoImage, Version);
             this.Size = Settings.Default.FormSize;
 
             #endregion
@@ -241,14 +240,7 @@ namespace Shadowin
         /// </summary>
         private void OnExitHotKey()
         {
-            using (var confirm = new Confirm("感谢您使用！您确定要关闭程序吗？"))
-            {
-                var result = confirm.ShowDialog();
-                if (result == DialogResult.Yes)
-                {
-                    this.Close();
-                }
-            }
+            this.Close();
         }
 
         #endregion
@@ -263,7 +255,7 @@ namespace Shadowin
         {
             if (this.Visible)
             {
-                this.Shadowin_SizeChanged(sender, e);
+                //this.Shadowin_SizeChanged(sender, e);
                 this.LoadUrl();
             }
             else
@@ -285,7 +277,26 @@ namespace Shadowin
                 webBrowser.Refresh(WebBrowserRefreshOption.Completely);
             }
         }
-        private void Shadowin_SizeChanged(object sender, EventArgs e)
+       
+        private void webBrowser_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
+        {
+            // 缩放
+            if (!_currentZoom.HasValue)
+            {
+                _currentZoom = SwGlobal.PageZoom;
+                object value = _currentZoom.Value, obj = null;
+                try
+                {
+                    (webBrowser.ActiveXInstance as SHDocVw.WebBrowser)
+                        .ExecWB(SHDocVw.OLECMDID.OLECMDID_OPTICAL_ZOOM, SHDocVw.OLECMDEXECOPT.OLECMDEXECOPT_DONTPROMPTUSER, ref value, ref obj);
+                }
+                catch { }
+            }
+        }
+
+        #endregion
+
+        private void Shadowin_Load(object sender, EventArgs e)
         {
             // 分屏
             if (_currentScreen == null)
@@ -304,22 +315,5 @@ namespace Shadowin
             this.Left = _currentScreen.WorkingArea.X + _currentScreen.WorkingArea.Width - this.Width;
             this.Top = _currentScreen.WorkingArea.Y + _currentScreen.WorkingArea.Bottom - this.Height;
         }
-        private void webBrowser_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
-        {
-            // 缩放
-            if (!_currentZoom.HasValue)
-            {
-                _currentZoom = SwGlobal.PageZoom;
-                object value = _currentZoom.Value, obj = null;
-                try
-                {
-                    (webBrowser.ActiveXInstance as SHDocVw.WebBrowser)
-                        .ExecWB(SHDocVw.OLECMDID.OLECMDID_OPTICAL_ZOOM, SHDocVw.OLECMDEXECOPT.OLECMDEXECOPT_DONTPROMPTUSER, ref value, ref obj);
-                }
-                catch { }
-            }
-        }
-
-        #endregion
     }
 }
